@@ -75,6 +75,7 @@ Resources:
           - !Ref ApiInvoke
           - arn:aws:iam::aws:policy/job-function/NetworkAdministrator
           - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
+          - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         Path: /
 
   # REST API using IAM as Authorizer

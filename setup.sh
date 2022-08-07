@@ -180,6 +180,9 @@ cleanup()
 	aws cloudformation delete-stack --stack-name ${stack_us_lambda_edge} --region us-east-1
 	aws cloudformation delete-stack --stack-name ${stack_us_userpool} --region us-east-1
 	aws cloudformation delete-stack --stack-name ${stack_us_s3_bucket} --region us-east-1
+	aws s3 rb --force s3://${PublicS3BucketName}
+	aws s3 rb --force s3://${PrivateS3BucketName}
+	aws s3 rb --force s3://$bucket
 
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_us_userpool} --region us-east-1
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_us_s3_bucket} --region us-east-1
@@ -187,9 +190,6 @@ cleanup()
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_eu_databasesetup} --region eu-west-2
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_us_lambda_edge} --region us-east-1
 
-	aws s3 rb --force s3://${PublicS3BucketName}
-	aws s3 rb --force s3://${PrivateS3BucketName}
-	aws s3 rb --force s3://$bucket
 
 	set +x
 }

@@ -342,6 +342,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonRDSFullAccess
         - arn:aws:iam::aws:policy/job-function/NetworkAdministrator
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
 
   SshInstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
