@@ -1,0 +1,5 @@
+.aws-sam
+.idea
+__pycache__
+out.json
+out.json.updated

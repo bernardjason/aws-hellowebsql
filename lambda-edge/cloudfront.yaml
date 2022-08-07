@@ -1,0 +1,67 @@
+Description: >
+  Edge and Cognito
+
+
+Resources:
+
+  CFDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: 'true'
+        Comment : Auth at Edge Test Distro
+        DefaultRootObject: index.html
+        Origins:
+          -
+            Id: S3OriginPrivate
+            DomainName: !ImportValue S3BucketPrivate-DomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !ImportValue CFOriginAccessIdentity
+          -
+            Id: S3OriginPublic
+            DomainName: !ImportValue S3BucketPublic-DomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !ImportValue CFOriginAccessIdentity
+        DefaultCacheBehavior:
+          TargetOriginId: S3OriginPublic
+          ForwardedValues:
+            QueryString: 'false'
+            Headers:
+              - Origin
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
+        CacheBehaviors:
+          - PathPattern: 'private/*'
+            TargetOriginId: S3OriginPrivate
+            ForwardedValues:
+              QueryString: 'false'
+              Headers:
+                - Origin
+              Cookies:
+                Forward: none
+            ViewerProtocolPolicy: redirect-to-https
+          - PathPattern: 'public/*'
+            TargetOriginId: S3OriginPublic
+            ForwardedValues:
+              QueryString: 'false'
+              Headers:
+                - Origin
+              Cookies:
+                Forward: none
+            ViewerProtocolPolicy: redirect-to-https
+
+Outputs:
+  CloudFrontDistributionId:
+    Description: CFDistributionId
+    Value: !Sub '${CFDistribution}'
+    Export:
+      Name: CloudFrontDistributionId
+  CloudFrontDistribution:
+    Description: Edit CloudFront distribution settings
+    Value: !Sub 'https://console.aws.amazon.com/cloudfront/home?region=${AWS::Region}#distribution-settings:${CFDistribution}'
+  CloudFrontUrl:
+    Description: Click here to test your Authorization @Edge stack
+    Value: !Sub 'https://${CFDistribution.DomainName}'
+    Export:
+      Name: CloudFrontUrl

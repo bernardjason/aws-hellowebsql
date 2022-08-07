@@ -1,0 +1,158 @@
+<html>
+<head>
+    <title>private</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        td {
+            padding-top:20px;
+        }
+        textarea {
+            width:90%;
+        }
+    </style>
+</head>
+<body onload="getToken();callRead()">
+    <h1>Logged in, private page</h1>
+    <div class="main">
+    <table>
+        <tr>
+            <td>login/logout via cognito</td>
+            <td>
+                <button onclick="authenticateWithCognito()">Login</button>
+                <button onclick="logout()">Logout</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                send a new message by POST'ing to /updates
+                <br>
+            </td>
+        </tr>
+        <tr>
+            <td valign="top">
+                <textarea id="message"></textarea>
+            </td>
+            <td valign="top">
+                <button onclick="callUpdate()">call update</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div id="updateoutput"></div>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <button onclick="callRead()">refresh, call read</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div id="readoutput"></div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script>
+    var access_token = null;
+    var UserPoolId ='us-east-1_L2bdp5WK7';
+    var ClientId ='2nqn6mis45qqvfmhkina4o619g';
+    var BaseURL = 'https://dz06jluaa9o10.cloudfront.net';
+    var Cognito = 'https://us-userpool-bernardjasonhere-pool-domain.auth.us-east-1.amazoncognito.com';
+    var apigwurl = 'https://hkqk77frxg.execute-api.eu-west-2.amazonaws.com/Dev';
+    var loginUrl=BaseURL+"/index.html";
+    var privateUrl=BaseURL+"/private/index.html";
+
+    function callRead()
+    {
+        URL = apigwurl+'/reads';
+        $.ajax({
+            type: "GET",
+            url: URL,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", access_token);
+            },
+            success: function(data){
+                var table = $('<table border="1"/>');
+                var headerTr = $('<tr/>');
+
+                for (var index in Object.values(data)[0]) {
+                    headerTr.append($('<th/>').html(index));
+                }
+                table.append(headerTr);
+                $.each( data, function( key, json ) {
+                  var row = $('<tr/>');
+                  row.append($('<td/>').html(json.when));
+                  row.append($('<td/>').html(json.user_handle));
+                  row.append($('<td/>').html(json.message));
+                  table.append(row);
+                });
+                $("#readoutput").html( table );
+            },
+            error: function(errMsg) {
+                alert(JSON.stringify(errMsg));
+            }
+        });
+    }
+    function callUpdate()
+    {
+        URL = apigwurl+'/updates';
+        message = $('#message').val();
+        someJson = {    "message": message,    "user": "notused" };
+
+        console.log(someJson);
+        $.ajax({
+            type: "POST",
+            url: URL,
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", access_token);
+            },
+            data: JSON.stringify( someJson ),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(data){
+                document.getElementById("updateoutput").innerHTML = "<BR><code>" + JSON.stringify(data) + "</code>";
+                callRead();
+            },
+            error: function(errMsg) {
+                alert(JSON.stringify(errMsg));
+            }
+        });
+    }
+
+    function getToken() {
+	    access_token=getCookie("authorization");
+    }
+
+    function logout() {
+		url='/index.html';
+		window.location.replace( url );
+    }
+
+	function authenticateWithCognito() {
+		url=Cognito+'/login?client_id='+ClientId+'&response_type=token&redirect_uri='+loginUrl;
+		window.location.replace( url );
+  	}
+    function getCookie(cname) {
+  		let name = cname + "=";
+  		let decodedCookie = decodeURIComponent(document.cookie);
+  		let ca = decodedCookie.split(';');
+  		for(let i = 0; i <ca.length; i++) {
+    			let c = ca[i];
+    			while (c.charAt(0) == ' ') {
+      				c = c.substring(1);
+    			}
+    			if (c.indexOf(name) == 0) {
+      				return c.substring(name.length, c.length);
+    			}
+  		}
+  		return "";
+	}
+
+</script>
+</body>
+</html>

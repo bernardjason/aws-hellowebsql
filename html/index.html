@@ -1,0 +1,63 @@
+<html>
+<head>
+    <title>public login</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body onload="getToken()">
+<div id="loginpage" style="display: none;">
+    <h1>Private Content Viewer</h1>
+    <div class="main">
+    </div>
+    <hr/>
+    <table>
+        <tr>
+            <td>
+                <button onclick="authenticateWithCognito()">Login</button>
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="loggingin" style="display: none;">
+    <h1>logging in</h1>
+</div>
+
+<script>
+    var access_token = null;
+    var UserPoolId ='us-east-1_L2bdp5WK7';
+    var ClientId ='2nqn6mis45qqvfmhkina4o619g';
+    var BaseURL = 'https://dz06jluaa9o10.cloudfront.net';
+    var Cognito = 'https://us-userpool-bernardjasonhere-pool-domain.auth.us-east-1.amazoncognito.com';
+    var apigwurl = 'https://hkqk77frxg.execute-api.eu-west-2.amazonaws.com/Dev';
+    var loginUrl=BaseURL+"/index.html";
+    var privateUrl=BaseURL+"/private/index.html";
+
+	function getToken() {
+ 		var loginpage = document.getElementById("loginpage");
+        var loggingin = document.getElementById("loggingin");
+	  	var results = new RegExp('[\?&#]access_token=([^&#]*)').exec(location.href);
+		if(results) {
+	        access_token = results[1];
+            setCookie('authorization',access_token,1);
+	    	window.location.replace( privateUrl );
+			loggingin.style.display = "block";
+	    } else {
+	    	access_token = null;
+			loginpage.style.display = "block";
+	    }
+	}
+
+	function setCookie(cname, cvalue, hours) {
+  		const d = new Date();
+  		d.setTime(d.getTime() + (hours*60*60*1000));
+  		let expires = "expires="+ d.toUTCString();
+  		document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+	}
+
+	function authenticateWithCognito() {
+		url=Cognito+'/login?client_id='+ClientId+'&response_type=token&redirect_uri='+loginUrl;
+		window.location.replace( url );
+  	}
+
+</script>
+</body>
+</html>

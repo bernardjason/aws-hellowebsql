@@ -1,0 +1,110 @@
+Description: >
+  create static s3 site
+
+Resources:
+  CFOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: CloudFrontOAI
+
+  S3BucketPrivate:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-origin-private-${AWS::AccountId}'
+      CorsConfiguration:
+        CorsRules:
+          -
+            AllowedOrigins:
+              - 'http*'
+            AllowedMethods:
+              - HEAD
+              - GET
+              - PUT
+              - POST
+              - DELETE
+            AllowedHeaders:
+              - '*'
+            ExposedHeaders:
+              - ETag
+              - x-amz-meta-custom-header
+
+  S3BucketPolicyPrivate:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketPrivate
+      PolicyDocument:
+        Statement:
+          -
+            Effect: Allow
+            Action: s3:GetObject
+            Principal:
+              CanonicalUser: !GetAtt CFOriginAccessIdentity.S3CanonicalUserId
+            Resource: !Sub 'arn:aws:s3:::${S3BucketPrivate}/*'
+
+  S3BucketPublic:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-origin-public-${AWS::AccountId}'
+      CorsConfiguration:
+        CorsRules:
+          -
+            AllowedOrigins:
+              - 'http*'
+            AllowedMethods:
+              - HEAD
+              - GET
+              - PUT
+              - POST
+              - DELETE
+            AllowedHeaders:
+              - '*'
+            ExposedHeaders:
+              - ETag
+              - x-amz-meta-custom-header
+
+  S3BucketPolicyPublic:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketPublic
+      PolicyDocument:
+        Statement:
+          -
+            Effect: Allow
+            Action: s3:GetObject
+            Principal:
+              CanonicalUser: !GetAtt CFOriginAccessIdentity.S3CanonicalUserId
+            Resource: !Sub 'arn:aws:s3:::${S3BucketPublic}/*'
+
+Outputs:
+  PrivateS3BucketName:
+    Description: Private S3 Bucket Name
+    Value: !Ref S3BucketPrivate
+    Export:
+      Name: PrivateS3BucketName
+  PublicS3BucketName:
+    Description: Public S3 Bucket Name
+    Value: !Ref S3BucketPublic
+    Export:
+      Name: PublicS3BucketName
+
+  PrivateS3BucketDomainName:
+    Description: Private S3 Bucket Name
+    Value: !GetAtt S3BucketPrivate.DomainName
+    Export:
+      Name: S3BucketPrivate-DomainName
+  PublicS3BucketDomainName:
+    Description: Public S3 Bucket Name
+    Value: !GetAtt S3BucketPublic.DomainName
+    Export:
+      Name: S3BucketPublic-DomainName
+
+  CFOriginAccessIdentity:
+    Description: CFOriginAccessIdentity
+    Value: !Sub origin-access-identity/cloudfront/${CFOriginAccessIdentity}
+    Export:
+      Name: CFOriginAccessIdentity
+
+

@@ -1,0 +1,6 @@
+#cryptography==37.0.2
+python-jose==3.3.0
+jose==1.0.0
+mysql-connector-python==8.0.29
+protobuf==4.21.1
+PyMySQL==1.0.2

@@ -1,0 +1,249 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "apigw demo",
+    "description": "apigw demo API.",
+    "version": "1.0"
+  },
+  "paths": {
+    "/updates": {
+      "description": "apigw update resources",
+      "post": {
+        "operationId": "Update hello",
+        "description": "POST.... apigw demo API. returns Hello Model",
+        "security": [
+          {
+            "MyUserPool": [ ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hello"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "credentials": { "Fn::GetAtt": ["ApiLambdaExecutionRole","Arn"] },
+          "httpMethod": "POST",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AppFunction.Arn}:${Stage}/invocations"
+          },
+          "payloadFormatVersion": 1.0
+        }
+      },
+      "options": {
+        "summary": "CORS support",
+        "description": "Enable CORS by returning correct headers\n",
+        "tags": [
+          "CORS"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default response for CORS method",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {}
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "mock",
+          "requestTemplates": {
+            "application/json": "{\n  \"statusCode\" : 200\n}\n"
+          },
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'",
+                "method.response.header.Access-Control-Allow-Methods": "'*'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              },
+              "responseTemplates": {
+                "application/json": "{}\n"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reads": {
+      "description": "apigw read resources",
+      "options": {
+        "summary": "CORS support",
+        "description": "Enable CORS by returning correct headers\n",
+        "tags": [
+          "CORS"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default response for CORS method",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {}
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "mock",
+          "requestTemplates": {
+            "application/json": "{\n  \"statusCode\" : 200\n}\n"
+          },
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'",
+                "method.response.header.Access-Control-Allow-Methods": "'*'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              },
+              "responseTemplates": {
+                "application/json": "{}\n"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "Get Hello",
+        "description": "GET.... apigw demo API. returns Hello Model",
+        "parameters": [
+        ],
+        "security": [
+          {
+            "MyUserPool": [ ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hello"
+                }
+              }
+            }
+          }
+        },        
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "credentials": { "Fn::GetAtt": ["ApiLambdaExecutionRole","Arn"] },
+          "httpMethod": "POST",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AppFunction.Arn}:${Stage}/invocations"
+          },
+          "payloadFormatVersion": 1.0
+        }
+      }
+    }
+  },
+  "x-amazon-apigateway-cors": {
+    "allowOrigins": [
+      "*"
+    ],
+    "allowMethods": [
+      "GET",
+      "OPTIONS",
+      "POST"
+    ],
+    "allowHeaders": [
+      "x-amzm-header",
+      "x-apigateway-header",
+      "x-api-key",
+      "authorization",
+      "x-amz-date",
+      "content-type"
+    ]
+  },
+  "components": {
+    "securitySchemes": {
+      "MyUserPool" : {
+        "type" : "apiKey",
+        "name" : "Authorization",
+        "in" : "header",
+        "x-amazon-apigateway-authtype" : "oauth2",
+        "x-amazon-apigateway-authorizer" : {
+          "type" : "request",
+          "identitySource": "method.request.header.Authorization",
+          "authorizerUri" : {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaAuthFunction.Arn}/invocations"
+          },
+          "authorizerCredentials" : {
+            "Fn::Sub": "${ApiLambdaExecutionRole.Arn}"
+          }
+        }
+      }
+
+    },
+    "schemas": {
+      "Hello": {
+        "type": "object",
+        "properties": {
+          "hello": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

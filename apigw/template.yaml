@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless patterns - Amazon API Gateway REST API for RDS ops
+
+Parameters:
+  Stage:
+    Type: String
+    Default: Dev
+  S3BucketName:
+    Type: String
+  appclientid:
+    Type: String
+  userpoolid:
+    Type: String
+
+
+Resources:
+  AuthExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+
+  ApiInvoke:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - lambda:InvokeFunction
+            Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:*'
+
+
+  ApiLambdaExecutionRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - apigateway.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        ManagedPolicyArns:
+          - !Ref ApiInvoke
+          - arn:aws:iam::aws:policy/job-function/NetworkAdministrator
+          - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
+        Path: /
+
+  # REST API using IAM as Authorizer
+  AppApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Description: IAM authorizer REST API demo
+      StageName: Dev
+      OpenApiVersion: '2.0'
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location:
+              Fn::Join:
+                - ''
+                - - 's3://'
+                  - Ref: S3BucketName
+                  - '/swagger.json'
+
+  LambdaAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: decode-verify-jwt.lambda_handler
+      Runtime: python3.8
+      MemorySize: 128
+      Role:  !GetAtt AuthExecutionRole.Arn
+      Environment:
+        Variables:
+          region : us-east-1
+          userpool_id : !Ref userpoolid
+          app_client_id : !Ref appclientid
+
+
+
+  # Dummy function
+  AppFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      AutoPublishAlias: 
+        Ref: Stage
+      Environment:
+        Variables:
+          RDSUserSecretId: !ImportValue RDSUserSecretId
+      CodeUri: . 
+      Handler: app.handler
+      Runtime: python3.8
+      Role: !GetAtt 'ApiLambdaExecutionRole.Arn'
+      Events:
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue SecurityGroups
+        SubnetIds:
+          - !ImportValue PrivateSubnetOne
+          - !ImportValue PrivateSubnetTwo
+
+Outputs:
+
+  AppApiEndpoint:
+    Description: API Endpoint
+    Value: !Sub "https://${AppApi}.execute-api.${AWS::Region}.amazonaws.com/Dev"
+    Export:
+      Name: AppApiEndpoint
+  ApiGwRestApiId:
+    Description: API id
+    Value: !Sub "${AppApi}"
+    Export:
+      Name: ApiGwRestApiId

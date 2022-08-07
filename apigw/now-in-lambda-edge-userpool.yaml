@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: userpool
+Parameters:
+  PoolName:
+    Type: String
+    Description: cognito pool name
+
+Resources:
+  UserPool:
+    Type: "AWS::Cognito::UserPool"
+    Properties:
+      UserPoolName: !Sub ${PoolName}
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+          - Name: verified_phone_number
+            Priority: 2
+      AutoVerifiedAttributes:
+        - email
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: true
+
+  UserPoolDomain: 
+    Type: AWS::Cognito::UserPoolDomain 
+    Properties:
+      UserPoolId: !Ref UserPool 
+      Domain: !Sub "${PoolName}-bernardjasonhere-pool-domain"
+
+  UserPoolTestClient:
+    Type: 'AWS::Cognito::UserPoolClient'
+    Properties:
+      ClientName: GuiSignOn
+      GenerateSecret: true
+      UserPoolId: !Ref UserPool
+      CallbackURLs:
+        - https://d1g97z1lmf6u55.cloudfront.net/index.html
+      LogoutURLs:
+        - https://d1g97z1lmf6u55.cloudfront.net/index.html
+      SupportedIdentityProviders:
+        - COGNITO
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows: 
+        - implicit
+        - code
+      AllowedOAuthScopes:
+        - openid
+        - aws.cognito.signin.user.admin
+      # cognito user pool and client credentials.
+
+Outputs:
+    UserPoolArn:
+        Description: UserPoolArn
+        Value: !GetAtt UserPool.Arn
+        Export:
+           Name: !Sub "${PoolName}-UserPool"
+    UserPoolId:
+      Description: UserPoolArn
+      Value: !Ref UserPool
+      Export:
+        Name: !Sub "${PoolName}-UserPoolId"
+    ClientId:
+      Description: ClientId
+      Value: !Ref UserPoolTestClient
+      Export:
+        Name: !Sub "${PoolName}-ClientId"
+
