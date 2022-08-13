@@ -366,7 +366,7 @@ Resources:
             Effect: "Allow"
             Principal:
               Service:
-                - "lambda.amazonaws.com"
+                - "ec2.amazonaws.com"
             Action:
               - "sts:AssumeRole"
       Path: "/"

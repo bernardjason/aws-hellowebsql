@@ -39,11 +39,11 @@ Resources:
             - logs:PutLogEvents
             Resource: arn:aws:logs:*:*:*
 
-  HelloWorldFunction:
+  LambdaEdgeFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: edge-us-east-1/
-      Handler: decode-verify-jwt.lambda_handler
+      Handler: edge-function-verify-jwt.lambda_handler
       Runtime: python3.8
       MemorySize: 128
       Role:  !GetAtt EdgeAuthExecutionRole.Arn
@@ -51,18 +51,18 @@ Resources:
 # version:
 #   Type: AWS::Lambda::Version
 #   Properties:
-#     FunctionName: !Ref HelloWorldFunction
+#     FunctionName: !Ref LambdaEdgeFunction
 #     Description: v1
 
 Outputs:
   EdgeFunctionArn:
     Description: auth lambda
-    Value: !GetAtt HelloWorldFunction.Arn
+    Value: !GetAtt LambdaEdgeFunction.Arn
     Export:
       Name: EdgeFunctionArn
   EdgeFunctionName:
     Description: auth lambda
-    Value: !Ref HelloWorldFunction
+    Value: !Ref LambdaEdgeFunction
     Export:
       Name: EdgeFunctionName
 

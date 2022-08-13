@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "apigw demo",
-    "description": "apigw demo API.",
+    "title": "apigw hellowebsql",
+    "description": "apigw hellowebsql API.",
     "version": "1.0"
   },
   "paths": {
@@ -40,7 +40,7 @@
           "credentials": { "Fn::GetAtt": ["ApiLambdaExecutionRole","Arn"] },
           "httpMethod": "POST",
           "uri": {
-            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AppFunction.Arn}:${Stage}/invocations"
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApigwLambdaFunction.Arn}:${Stage}/invocations"
           },
           "payloadFormatVersion": 1.0
         }
@@ -190,7 +190,7 @@
           "credentials": { "Fn::GetAtt": ["ApiLambdaExecutionRole","Arn"] },
           "httpMethod": "POST",
           "uri": {
-            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AppFunction.Arn}:${Stage}/invocations"
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApigwLambdaFunction.Arn}:${Stage}/invocations"
           },
           "payloadFormatVersion": 1.0
         }

@@ -19,8 +19,8 @@ from jose import jwk, jwt
 from jose.utils import base64url_decode
 
 region = 'us-east-1'
-userpool_id = 'us-east-1_L2bdp5WK7'
-app_client_id = '2nqn6mis45qqvfmhkina4o619g='
+userpool_id = 'us-east-1_5lmsOhS1v'
+app_client_id = '2rauvuf9i59fjq8jdoang5gm4d='
 
 keys_url = 'https://cognito-idp.{}.amazonaws.com/{}/.well-known/jwks.json'.format(region, userpool_id)
 # instead of re-downloading the public keys every time

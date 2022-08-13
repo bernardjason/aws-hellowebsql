@@ -35,7 +35,7 @@ setup_lambda_to_createdb_tables() {
 
 	echo "************** setup_lambda_to_createdb_tables ************************"
 	sam build
-	sam deploy --resolve-s3 --stack-name $stack_eu_databasesetup
+	sam deploy --region eu-west-2 --resolve-s3 --stack-name $stack_eu_databasesetup
 
 
 	check_lambda_exists setupDatabaseTables eu-west-2
@@ -67,7 +67,7 @@ setup_lambda_edge_and_cloudfront()
 	app_client_id=$(cat out.json |  jq -r '.Exports[]|select(.Name == "us-userpool-ClientId")|.Value ')
 	user_pool_url=$(cat out.json |  jq -r '.Exports[]|select(.Name == "UserPoolUrl")|.Value ')
 	
-	sed -i -e "s/userpool_id =.*/userpool_id = '$userpool_id'/"  -e "s/app_client_id =.*/app_client_id = '$app_client_id='/" edge-us-east-1/decode-verify-jwt.py
+	sed -i -e "s/userpool_id =.*/userpool_id = '$userpool_id'/"  -e "s/app_client_id =.*/app_client_id = '$app_client_id='/" edge-us-east-1/edge-function-verify-jwt.py
 	
 	
 	sam build
@@ -187,22 +187,24 @@ cleanup()
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_us_userpool} --region us-east-1
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_us_s3_bucket} --region us-east-1
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_eu_apigw} --region eu-west-2
-	aws cloudformation wait stack-delete-complete --stack-name ${stack_eu_databasesetup} --region eu-west-2
+	echo "This may fail, try again from console later on"
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_us_lambda_edge} --region us-east-1
+	echo "This can take some time"
+	aws cloudformation wait stack-delete-complete --stack-name ${stack_eu_databasesetup} --region eu-west-2
 
 
 	set +x
 }
 
-if [ $action == "cleanup" ] ; then
+if [ "$action" == "cleanup" ] ; then
 	cleanup
 	exit
 fi
-if [ $action == "create" -a "x$somethingunique" != "x"  ] ; then
+if [ "$action" == "create" -a "x$somethingunique" != "x"  ] ; then
 	#pip3 install --user -r lambda-edge/edge-us-east-1/requirements.txt
 	#pip3 install --user -r apigw/requirements.txt
 	#pip3 install --user -r dbsetuplambda/lambda/requirements.txt
-	pip install wheel
+	pip3.8 install wheel
 
 
 	setup_lambda_to_createdb_tables
