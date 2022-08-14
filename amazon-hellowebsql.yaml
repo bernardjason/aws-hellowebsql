@@ -394,8 +394,7 @@ Resources:
       InstanceType: t2.small
       IamInstanceProfile: !Ref AdminInstanceProfile
       NetworkInterfaces: 
-        - AssociatePublicIpAddress: "true"
-          SubnetId: !Ref PublicSubnet01
+        - SubnetId: !Ref PrivateSubnet01
           DeviceIndex: "0"
           DeleteOnTermination: "true"
           GroupSet:
