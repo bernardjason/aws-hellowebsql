@@ -20,10 +20,14 @@ The AWS configuration has an ec2 instance simply to offer an easy way to run the
 
 # how to setup
 
+[![Youtube demo video](http://img.youtube.com/vi/dNQDL11115A/0.jpg)](http://www.youtube.com/watch?v=dNQDL11115A "Youtube Video Demo")
+
 As an administrator log onto AWS console in eu-west-2
 
 Go to Cloudformation and create a new stack. You can accept all the defaults. This will create
 VPC,Subnets,RDS and EC2 instance. 
+
+Have not used a custom resource in Cloudformation to create db schema, that's a separate Lambda created below.
 
 Log onto the EC2 instance using session manager. The EC2 is in a private subnet, you will be logged
 in as
