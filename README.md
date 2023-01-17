@@ -36,7 +36,7 @@ uid=1001(ssm-user) gid=1001(ssm-user) groups=1001(ssm-user)
 cd $HOME
 git clone https://github.com/bernardjason/aws-hellowebsql.git
 cd aws-hellowebsql
-bash setup create <random name, has to be something unique like as used for resources> 
+bash setup.sh create <random name, has to be something unique like as used for resources> 
 #After about 10-15 minutes script will end. To check state of Cloudfron update
 aws cloudfront   list-distributions | jq -r '.DistributionList.Items[] | [ .Id, .Status]'
 ```
