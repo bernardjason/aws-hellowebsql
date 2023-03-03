@@ -2,8 +2,6 @@ import json
 import os
 
 print('Loading function')
-if __name__ == "__main__":
-    os.environ['RDSUserSecretId'] = "arn:aws:secretsmanager:eu-west-2:975820831807:secret:helloworld-admin-EYZiMC"
 
 from setup_database_connection import conn
 
