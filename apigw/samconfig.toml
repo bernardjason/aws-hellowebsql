@@ -3,7 +3,7 @@ version = 0.1
 [default.deploy]
 [default.deploy.parameters]
 stack_name = "eu-bernard-apigw"
-region = "eu-west-2"
+region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
 parameter_overrides = "Stage=\"Dev\" S3BucketName=\"bernard-apigw\""

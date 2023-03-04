@@ -26,8 +26,8 @@ check_lambda_exists() {
 
 create_vpc()
 {
-	aws cloudformation create-stack --stack-name eu-vpc-database-ec2 --template-body file://amazon-hellowebsql.yaml --capabilities CAPABILITY_NAMED_IAM --region eu-west-2
-	./status.sh eu-vpc-database-ec2 eu-west-2
+	aws cloudformation create-stack --stack-name eu-vpc-database-ec2 --template-body file://amazon-hellowebsql.yaml --capabilities CAPABILITY_NAMED_IAM --region us-east-1
+	./status.sh eu-vpc-database-ec2 us-east-1
 }
 
 setup_lambda_to_createdb_tables() {
@@ -35,10 +35,10 @@ setup_lambda_to_createdb_tables() {
 
 	echo "************** setup_lambda_to_createdb_tables ************************"
 	sam build
-	sam deploy --region eu-west-2 --resolve-s3 --stack-name $stack_eu_databasesetup
+	sam deploy --region us-east-1 --resolve-s3 --stack-name $stack_eu_databasesetup
 
 
-	check_lambda_exists setupDatabaseTables eu-west-2
+	check_lambda_exists setupDatabaseTables us-east-1
 	
 	aws lambda invoke --cli-binary-format raw-in-base64-out  --function-name setupDatabaseTables --payload '{  }'  out.json
 
@@ -99,12 +99,12 @@ setup_apigw()
 
 	aws s3 cp swagger.json  s3://$bucket
 	sam build
-	sam deploy --region eu-west-2 --resolve-s3 --stack-name $stack_eu_apigw  --parameter-overrides \
+	sam deploy --region us-east-1 --resolve-s3 --stack-name $stack_eu_apigw  --parameter-overrides \
 		ParameterKey=appclientid,ParameterValue=$app_client_id \
 		ParameterKey=userpoolid,ParameterValue=$userpool_id \
 		ParameterKey=S3BucketName,ParameterValue=$bucket 
 
-	aws cloudformation list-exports --region eu-west-2 > out.json
+	aws cloudformation list-exports --region us-east-1 > out.json
 
 	apigwurl=$(cat out.json |  jq -r '.Exports[]|select(.Name == "AppApiEndpoint")|.Value ')
 
@@ -172,8 +172,8 @@ cleanup()
 
 	set -x	
 	aws cloudformation delete-stack --stack-name ${stack_us_cloudfront} --region us-east-1
-	aws cloudformation delete-stack --stack-name ${stack_eu_apigw} --region eu-west-2
-	aws cloudformation delete-stack --stack-name ${stack_eu_databasesetup} --region eu-west-2
+	aws cloudformation delete-stack --stack-name ${stack_eu_apigw} --region us-east-1
+	aws cloudformation delete-stack --stack-name ${stack_eu_databasesetup} --region us-east-1
 
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_us_cloudfront} --region us-east-1
 		
@@ -186,11 +186,11 @@ cleanup()
 
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_us_userpool} --region us-east-1
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_us_s3_bucket} --region us-east-1
-	aws cloudformation wait stack-delete-complete --stack-name ${stack_eu_apigw} --region eu-west-2
+	aws cloudformation wait stack-delete-complete --stack-name ${stack_eu_apigw} --region us-east-1
 	echo "This may fail, try again from console later on"
 	aws cloudformation wait stack-delete-complete --stack-name ${stack_us_lambda_edge} --region us-east-1
 	echo "This can take some time"
-	aws cloudformation wait stack-delete-complete --stack-name ${stack_eu_databasesetup} --region eu-west-2
+	aws cloudformation wait stack-delete-complete --stack-name ${stack_eu_databasesetup} --region us-east-1
 
 
 	set +x

@@ -4,6 +4,6 @@ version = 0.1
 [default.deploy.parameters]
 stack_name = "eu-databasesetup"
 s3_prefix = "backend"
-region = "eu-west-2"
+region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
